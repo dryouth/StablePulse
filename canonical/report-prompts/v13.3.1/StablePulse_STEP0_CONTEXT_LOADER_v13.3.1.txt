@@ -1,0 +1,68 @@
+# STABLEPULSE — STEP 0 CONTEXT LOADER v13.3.1
+
+## TASK
+
+첨부된 `STABLEPULSE WEEKLY CONTEXT BUNDLE` 페이지 또는 TXT를 읽고,
+이 thread에서 이후 Step 2가 사용할 weekly context로 등록한다.
+
+첨부 문서는 다음 7개 고정 source heading으로 구성된다:
+
+- S1 = `PYTHON_GROUND_TRUTH`
+- S2 = `STABLECOIN_MARKET_INTELLIGENCE`
+- S3 = `MACRO_NEWS_SUMMARY`
+- S4 = `RRI_DASHBOARD`
+- S5 = `ETH_SE_LEVEL_DASHBOARD`
+- S6 = `CRCL_SE_LEVEL_DASHBOARD`
+- S7 = `BTC_RELATED_ASSET_TECHNICAL_CONTEXT`
+
+## THREE-FILE ATTACHMENT MODE
+
+Step 0 프롬프트와 함께 `StablePulse_S1_*.txt` 및 `YYYY-MM-DD_입력모음.txt`를 동시에 첨부할 수 있다. 이때 Python 출력 TXT 전체를 S1 `PYTHON_GROUND_TRUTH`로 등록하고, 입력모음 TXT에서는 S2–S7만 읽는다. 입력모음 안의 S1 본문은 비어 있거나 기존 내용이 있어도 사용하지 않으며 두 S1을 병합하지 않는다. Step 0 프롬프트 자체는 source로 세지 않는다.
+
+## INGESTION RULES
+
+1. S1–S7의 내용을 그대로 읽고 보존한다.
+2. 숫자, 날짜, label, classification, source attribution을 수정·반올림·재계산하지 않는다.
+3. source 간 비교·분석·해석·충돌 조정은 이 단계에서 하지 않는다.
+4. 투자 판단, MCPO/RRI 판단, ESM×CrSM 해석, SE-Level 판단을 실행하지 않는다.
+5. report outline, draft, summary, metrics snapshot을 만들지 않는다.
+6. source 내용을 채팅창에 다시 복사하거나 요약하지 않는다.
+7. 외부 검색이나 추가 지식을 사용하지 않는다.
+8. StablePulse issue number와 report dates는 별도 입력받지 않는다. Step 2가 S1–S7 내부에서 직접 읽는다.
+
+<!-- V13.2 ADDITION START: ROUTING INDEX -->
+## V13.2 REQUIRED ROUTING INDEX — SCHEMA ONLY
+
+이 검사는 source 내용을 해석하거나 재계산하지 않는다. 아래 label이 지정된 source와 subsection 안에서 읽히는지만 확인하고, 읽힌 위치를 이후 Step 2가 사용할 routing index로 보존한다.
+
+- S1 → Investment Insights → Macro → Use data like: BTC_CorpTreasury, ETH_CorpTreasury
+- S1 → Investment Insights → DeFiRWA → Use data like: EDSStablecoin, USDTShare, USDCShare
+- S4: RRI Total, MCPO Phase, Distribution Triggers total, T1–T5 status
+- S5와 S6 각각: VALIDATION_STATUS, PART_A_HANDOFF_STATUS, PART_B_TRANSFER_STATUS, SOURCE_FILES, DAILY_ENDPOINT, WEEKLY_ENDPOINT, CURRENT_WEEK_INFORMATIONAL, ENDPOINT_VALIDATION, PART_A_SOURCE_LOCK
+
+S1에서 field가 놓인 subsection과 최종 리포트에서 사용할 section은 다를 수 있다. 예를 들어 Macro의 Use data like 줄에 있는 BTC_CorpTreasury는 리포트 섹션 4로 routing하며, DeFiRWA의 Use data like 줄에 있는 USDTShare/USDCShare는 리포트 섹션 5 온체인으로 routing한다. 물리적 위치 때문에 값을 누락하지 않는다.
+
+필수 label이 지정 경로에서 읽히지 않을 때만 다음처럼 field까지 표시한다:
+
+CONTEXT_ERROR: [source ID]:[field]
+
+모든 field가 읽히면 기존과 같이 CONTEXT_READY만 출력한다. 값의 의미·충돌·투자 판단은 Step 0에서 수행하지 않는다.
+<!-- V13.2 ADDITION END: ROUTING INDEX -->
+## VALIDATION
+
+확인할 것은 기존 두 항목과 위 V13.2 routing field뿐이다:
+
+- 단일 입력모음 모드: S1–S7 heading이 모두 존재하고 각 source block이 읽을 수 있을 정도로 비어 있지 않은가
+- 세 파일 분리 모드: Python 출력 TXT가 S1로 읽히고, 입력모음 TXT의 S2–S7 heading과 각 block이 모두 존재하며 비어 있지 않은가
+
+모두 정상이라면 정확히 다음 한 줄만 출력한다:
+
+`CONTEXT_READY`
+
+누락 또는 읽기 오류가 있을 때만:
+
+`CONTEXT_ERROR: [source ID]`
+
+형식으로 출력한다.
+
+그 외에는 아무것도 출력하지 않는다.
